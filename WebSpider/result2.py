@@ -7,10 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 
 SERVER = 'http://www.biqukan.com'
-TARGET = 'http://www.biqukan.com/1_1094/'
 SEARCH = 'https://so.biqusoso.com/s.php?siteid=biqukan.com&q=%s'
 
-BOOKPATH = 'E:\\work\\note\\Python\\WebSpider\\book'
+# 书籍下载目录
+BOOKPATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'download')
 
 
 # 获取章节集合
@@ -28,7 +28,6 @@ def getCatalogues(_url):
     result_a_list = []
     a_list = a_bf.find_all('a')[13:]
     for item in a_list:
-        # downBook(SERVER + item.get('href'))
         result_a_list.append(SERVER + item.get('href'))
     return _book_name, result_a_list
 
@@ -42,13 +41,20 @@ def downBook(_book_name, a_href):
     content = str(
         bf.find_all('div', class_='showtxt')[0].text.replace(
             '\xa0' * 8, '\n    ')).split('[笔趣看')[0]
+
     # 如果文件不存在，则新建一个文件
-    # if not os.path.exists(_path):
-    with open(_path, 'a', encoding='utf-8') as f:
-        f.writelines('\n\n\n\t')
-        f.write(title)
-        f.writelines('\n\n')
-        f.write(content)
+    if not os.path.isdir(BOOKPATH):  # 无文件夹时创建
+        os.makedirs(BOOKPATH)
+
+    if not os.path.isfile(_path):
+        fd = open(_path, mode="w", encoding="utf-8")
+        fd.close()
+    else:
+        with open(_path, 'a', encoding='utf-8') as f:
+            f.writelines('\n\n\n\t')
+            f.write(title)
+            f.writelines('\n\n')
+            f.write(content)
 
 
 def searchBook(book_name):
@@ -80,6 +86,7 @@ def genSearchBookUrl(search_result_url):
 
 
 if __name__ == "__main__":
+
     bn = input('请输入您要下载的书籍名称：')
 
     book_dict = searchBook(bn.strip())
