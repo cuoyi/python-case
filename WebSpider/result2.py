@@ -43,7 +43,7 @@ def downBook(_book_name, a_href):
             '\xa0' * 8, '\n    ')).split('[笔趣看')[0]
 
     # 如果文件不存在，则新建一个文件
-    if not os.path.isdir(BOOKPATH):  # 无文件夹时创建
+    if not os.path.isdir(BOOKPATH):
         os.makedirs(BOOKPATH)
 
     if not os.path.isfile(_path):
@@ -79,7 +79,6 @@ def genSearchBookUrl(search_result_url):
     l = search_result_url.split('/')
     id = str(l[len(l) - 1])
     id1 = id[0:len(id) - 3]
-    # id2 = id[len(id) - 3:len(id)]
     url_result = '%s/%s_%s' % (SERVER, id1, id)
     print(url_result)
     return url_result
