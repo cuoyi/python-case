@@ -42,7 +42,7 @@ def downBook(_book_name, a_href):
         bf.find_all('div', class_='showtxt')[0].text.replace(
             '\xa0' * 8, '\n    ')).split('[笔趣看')[0]
 
-    # 如果文件不存在，则新建一个文件
+    # 如果当前目录不存在文件夹，则新建一个文件夹
     if not os.path.isdir(BOOKPATH):
         os.makedirs(BOOKPATH)
 
