@@ -1,4 +1,6 @@
+#--coding:utf-8--
 import os
+import re
 import sys
 import urllib.parse
 from multiprocessing import Pool
@@ -19,16 +21,16 @@ def getCatalogues(_url):
     html = req.text
     div_bf = BeautifulSoup(html, 'lxml')
 
-    _book_name = div_bf.find('div', class_='info').findChildren('h2')[0].text
+    _book_name = div_bf.select_one('.book > .info > h2').string
 
     print('_book_name->%s' % _book_name)
 
-    div = div_bf.find_all('div', class_='listmain')[0]
-    a_bf = BeautifulSoup(str(div), 'lxml')
+    dd_list = div_bf.select('.listmain > dl > dt')[1].find_next_siblings()
+
     result_a_list = []
-    a_list = a_bf.find_all('a')[13:]
-    for item in a_list:
-        result_a_list.append(SERVER + item.get('href'))
+    for item in dd_list:
+        result_a_list.append(SERVER + item.select_one('a').get('href'))
+
     return _book_name, result_a_list
 
 
@@ -36,25 +38,33 @@ def downBook(_book_name, a_href):
     req = requests.get(url=a_href)
     html = req.text.encode('iso-8859-1')
     bf = BeautifulSoup(html, 'lxml')
-    title = bf.find_all('h1')[0].text
-    _path = os.path.join(BOOKPATH, _book_name + '.txt')
-    content = str(
-        bf.find_all('div', class_='showtxt')[0].text.replace(
-            '\xa0' * 8, '\n    ')).split('[笔趣看')[0]
+
+    # 章节标题
+    chapter_title = bf.select_one('.reader > .content > h1').text
+
+    # 正则表达式拆分文中url，(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]
+    content = re.split(
+        r'[(](https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|][)]',
+        bf.select_one('#content').text.replace('\xa0' * 8, '\n    '))[0]
 
     # 如果当前目录不存在文件夹，则新建一个文件夹
+    book_path = os.path.join(BOOKPATH, _book_name + '.txt')
+
     if not os.path.isdir(BOOKPATH):
         os.makedirs(BOOKPATH)
 
-    if not os.path.isfile(_path):
-        fd = open(_path, mode="w", encoding="utf-8")
-        fd.close()
-    else:
-        with open(_path, 'a', encoding='utf-8') as f:
-            f.writelines('\n\n\n\t')
-            f.write(title)
-            f.writelines('\n\n')
-            f.write(content)
+    if not os.path.isfile(book_path):
+        with open(book_path, 'w', encoding='utf-8') as f:
+            f.writelines('\n')
+            f.writelines('\t' + _book_name)
+
+    with open(book_path, 'a', encoding='utf-8') as f:
+        f.write('\n\n\n\t')
+        f.write(chapter_title)
+        f.write('\n')
+        f.write(content)
+
+    return chapter_title
 
 
 def searchBook(book_name):
@@ -71,7 +81,6 @@ def searchBook(book_name):
         book_dict[i] = {}
         book_dict[i]['name'] = item.text
         book_dict[i]['url'] = item.get('href')
-    print(book_dict)
     return book_dict
 
 
@@ -89,21 +98,26 @@ if __name__ == "__main__":
     bn = input('请输入您要下载的书籍名称：')
 
     book_dict = searchBook(bn.strip())
-    print('book_dict->%s' % book_dict)
 
-    i = 0
-    for key, value in book_dict.items():
-        i += 1
-        print('%s.%s' % (key, value['name']))
-    select_book_idx = input('请选择要下载的书籍：')
-    select_result = book_dict[int(select_book_idx)]
+    select_result = {}
+    if len(book_dict) == 0:
+        print('未查询到书籍')
+        sys.exit()
+    elif len(book_dict) == 1:
+        select_result = book_dict[1]
+    else:
+        for key, value in book_dict.items():
+            print('%s.%s' % (key, value['name']))
+        select_book_idx = input('请选择要下载的书籍：')
+        select_result = book_dict[int(select_book_idx)]
+
     print('select_result->%s' % select_result)
     url_result = ''
     if select_result is None:
         print('您选择的书籍不存在')
     else:
         print('您选择的书籍为->%s' % select_result['name'])
-        url_result = genSearchBookUrl(book_dict[int(select_book_idx)]['url'])
+        url_result = genSearchBookUrl(select_result['url'])
         print('url_result->%s' % url_result)
 
     _book_name, a_list = getCatalogues(url_result)
@@ -112,8 +126,9 @@ if __name__ == "__main__":
     count = len(a_list)
     for item in a_list:
         k += 1
-        downBook(_book_name, item)
-        sys.stdout.write("已下载:%.3f%%" % float(k / count * 100) + '\r')
+        chapter_title = downBook(_book_name, item)
+        print('已下载 %s' % chapter_title)
+        sys.stdout.write("已下载:%.2f%%" % float(k / count * 100) + '\r')
         sys.stdout.flush()
 
     print('全书下载完成！')
