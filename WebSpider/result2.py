@@ -71,7 +71,6 @@ def searchBook(book_name):
         book_dict[i] = {}
         book_dict[i]['name'] = item.text
         book_dict[i]['url'] = item.get('href')
-    print(book_dict)
     return book_dict
 
 
@@ -89,7 +88,6 @@ if __name__ == "__main__":
     bn = input('请输入您要下载的书籍名称：')
 
     book_dict = searchBook(bn.strip())
-    print('book_dict->%s' % book_dict)
 
     i = 0
     for key, value in book_dict.items():
