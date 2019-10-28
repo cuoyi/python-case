@@ -60,7 +60,6 @@ def searchBook(book_name):
     a_list = bf.find_all('a')
     book_dict = {}
     i = 0
-    print("a_list->%s" % a_list)
     for item in a_list:
         i += 1
         book_dict[i] = {}
@@ -81,7 +80,9 @@ def genSearchBookUrl(search_result_url):
 
 
 if __name__ == "__main__":
-    book_dict = searchBook('遮天')
+    bn = input('请输入您要下载的书籍名称：')
+
+    book_dict = searchBook(bn.strip())
     print('book_dict->%s' % book_dict)
 
     i = 0
@@ -105,7 +106,6 @@ if __name__ == "__main__":
     count = len(a_list)
     for item in a_list:
         k += 1
-        # print('_book_name->%s \nitem->%s' % (_book_name, item))
         downBook(_book_name, item)
         sys.stdout.write("已下载:%.3f%%" % float(k / count * 100) + '\r')
         sys.stdout.flush()
