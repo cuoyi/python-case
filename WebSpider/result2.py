@@ -115,6 +115,7 @@ if __name__ == "__main__":
     url_result = ''
     if select_result is None:
         print('您选择的书籍不存在')
+        sys.exit()
     else:
         print('您选择的书籍为->%s' % select_result['name'])
         url_result = genSearchBookUrl(select_result['url'])
