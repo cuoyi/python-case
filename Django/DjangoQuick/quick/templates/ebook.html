@@ -14,7 +14,7 @@
         <!--一下是新添加-->
         <form action="/ebook/" method="get">
             {% csrf_token %}
-            <input type="text" class="input_search" name="bookname" placeholder="最强弃少" value="">
+            <input type="text" class="input_search" name="bookname" placeholder="最强弃少" value="{{ bookname }}">
             <input type="submit" class="btn_search" value="查询">
         </form>
 
@@ -33,8 +33,8 @@
                 <td>{{ value.name }}</td>
                 <td>{{ value.author }}</td>
                 <td>
-                    <button class="btn_down">在线</button>
-                    <button class="btn_down">离线</button>
+                    <button class="btn_down">在线阅读</button>
+                    <button class="btn_down">离线下载</button>
                 </td>
             </tr>
             {% endfor %}

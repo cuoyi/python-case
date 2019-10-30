@@ -19,7 +19,7 @@ table > thead > tr > th {
 table > tbody > tr > td {
     width: 180px;
     text-align: center;
-    line-height: 30px;
+    line-height: 36px;
 }
 
 table > tbody > tr:hover {
@@ -34,7 +34,7 @@ table > tbody > tr > td:nth-child(2) {
     background-color: white;
     border: 1px solid #cccccc;
     height: 28px;
-    width: 60px;
+    width: 80px;
     border-radius: 5px;
     outline:none;
     cursor: pointer;
@@ -63,6 +63,7 @@ table > tbody > tr > td:nth-child(2) {
     outline: none;
     background-color: #0099CC;
     color: #ffffff;
+    cursor: pointer;
 }
 
 footer{
