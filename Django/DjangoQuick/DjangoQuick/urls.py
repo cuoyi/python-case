@@ -16,11 +16,13 @@ Including another URLconf
 import sys
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls import url
 
-from quick.views import index, ebook
+from quick.views import index, ebook, down
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', index),
-    path('ebook/', ebook)
+    path('ebook/', ebook),
+    url(r'^down/(\d+)$', down)
 ]

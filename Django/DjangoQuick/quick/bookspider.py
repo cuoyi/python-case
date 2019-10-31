@@ -27,9 +27,17 @@ def getCatalogues(_url):
 
     dd_list = div_bf.select('.listmain > dl > dt')[1].find_next_siblings()
 
-    result_a_list = []
+    result_a_list = {}
+    i = 0
     for item in dd_list:
-        result_a_list.append(SERVER + item.select_one('a').get('href'))
+        catalog_name = item.select_one('a').text
+        catalog_url = SERVER + item.select_one('a').get('href')
+
+        i += 1
+        result_a_list[i] = {}
+        result_a_list[i]['catalog_name'] = catalog_name
+        result_a_list[i]['catalog_url'] = catalog_url
+        result_a_list[i]['catalog_id'] = catalog_url.split('/')[-1].split('.')[0]
 
     return _book_name, result_a_list
 
@@ -43,9 +51,8 @@ def downBook(_book_name, a_href):
     chapter_title = bf.select_one('.reader > .content > h1').text
 
     # 正则表达式拆分文中url，(https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]
-    content = re.split(
-        r'[(](https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|][)]',
-        bf.select_one('#content').text.replace('\xa0' * 8, '\n    '))[0]
+    content = re.split(r'[(](https?)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|][)]',
+                       bf.select_one('#content').text.replace('\xa0' * 8, '\n    '))[0]
 
     # 如果当前目录不存在文件夹，则新建一个文件夹
     book_path = os.path.join(BOOKPATH, _book_name + '.txt')
@@ -78,59 +85,83 @@ def searchBook(book_name):
     book_dict = {}
     for item in a_list:
         i = int(item.select_one('.s1').text)
+        href = item.select_one('.s2 > a').get('href')
         book_dict[i] = {}
         book_dict[i]['name'] = item.select_one('.s2 > a').text
         book_dict[i]['author'] = item.select_one('.s4').text
-        book_dict[i]['url'] = item.select_one('.s2 > a').get('href')
+        book_dict[i]['url'] = href
+        book_dict[i]['urlid'] = href.split('/')[-1:][0]
     return book_dict
 
 
 def genSearchBookUrl(search_result_url):
-    l = search_result_url.split('/')
-    id = str(l[len(l) - 1])
+    bq_id = search_result_url.split('/')[-1]
+    id = str(bq_id)
     id1 = id[0:len(id) - 3]
     url_result = '%s/%s_%s' % (SERVER, id1, id)
-    print(url_result)
     return url_result
 
 
 if __name__ == "__main__":
+    # print(re.match(r'\d{1,3}', 'http://www.biqukan.com/18_18056/6412383.html'))
 
-    bn = input('请输入您要下载的书籍名称：')
+    catalog_url = 'http://www.biqukan.com/2_2722'  #genSearchBookUrl(book_id)
 
-    book_dict = searchBook(bn.strip())
+    print('catalog_url->%s' % catalog_url)
 
-    select_result = {}
-    if len(book_dict) == 0:
-        print('未查询到书籍')
-        sys.exit()
-    elif len(book_dict) == 1:
-        select_result = book_dict[1]
-    else:
-        for key, value in book_dict.items():
-            print('%s.%s' % (key, value['name']))
-        select_book_idx = input('请选择要下载的书籍：')
-        select_result = book_dict[int(select_book_idx)]
-
-    print('select_result->%s' % select_result)
-    url_result = ''
-    if select_result is None:
-        print('您选择的书籍不存在')
-        sys.exit()
-    else:
-        print('您选择的书籍为->%s' % select_result['name'])
-        url_result = genSearchBookUrl(select_result['url'])
-        print('url_result->%s' % url_result)
-
-    _book_name, a_list = getCatalogues(url_result)
+    _book_name, a_list = getCatalogues(catalog_url)
 
     k = 0
     count = len(a_list)
-    for item in a_list:
+    for key, value in a_list.items():
         k += 1
-        chapter_title = downBook(_book_name, item)
+        print('item->%s' % value)
+        chapter_title = downBook(_book_name, value['catalog_url'])
         print('已下载 %s' % chapter_title)
         sys.stdout.write("已下载:%.2f%%" % float(k / count * 100) + '\r')
         sys.stdout.flush()
 
     print('全书下载完成！')
+
+    # # test
+    # href = 'http://www.biqukan.com/book/goto/id/34459'
+    # print(href.split('/')[-1:][0])
+
+    # bn = input('请输入您要下载的书籍名称：')
+
+    # book_dict = searchBook(bn.strip())
+
+    # select_result = {}
+    # if len(book_dict) == 0:
+    #     print('未查询到书籍')
+    #     sys.exit()
+    # elif len(book_dict) == 1:
+    #     select_result = book_dict[1]
+    # else:
+    #     for key, value in book_dict.items():
+    #         print('%s.%s' % (key, value['name']))
+    #     select_book_idx = input('请选择要下载的书籍：')
+    #     select_result = book_dict[int(select_book_idx)]
+
+    # print('select_result->%s' % select_result)
+    # url_result = ''
+    # if select_result is None:
+    #     print('您选择的书籍不存在')
+    #     sys.exit()
+    # else:
+    #     print('您选择的书籍为->%s' % select_result['name'])
+    #     url_result = genSearchBookUrl(select_result['url'])
+    #     print('url_result->%s' % url_result)
+
+    # _book_name, a_list = getCatalogues(url_result)
+
+    # k = 0
+    # count = len(a_list)
+    # for item in a_list:
+    #     k += 1
+    #     chapter_title = downBook(_book_name, item)
+    #     print('已下载 %s' % chapter_title)
+    #     sys.stdout.write("已下载:%.2f%%" % float(k / count * 100) + '\r')
+    #     sys.stdout.flush()
+
+    # print('全书下载完成！')
