@@ -35,15 +35,17 @@ def ebook(request):
         book_name = request.GET.get('bookname')
         if not book_name is None:
             print('输入的书籍名称为：%s' % book_name)
-            # book_list = searchBook(book_name)
-        book_list = {
-            1: {
-                'name': '诛仙之绝代剑仙',
-                'author': '浮世暮秋',
-                'url': 'http://www.biqukan.com/book/goto/id/34459',
-                'urlid': 2722
-            }
-        }
+            book_list = searchBook(book_name)
+        else:
+            book_name = ''
+        # book_list = {
+        #     1: {
+        #         'name': '诛仙之绝代剑仙',
+        #         'author': '浮世暮秋',
+        #         'url': 'http://www.biqukan.com/book/goto/id/34459',
+        #         'urlid': 2722
+        #     }
+        # }
 
     return render(request, template_name='ebook.html', context={'books': book_list, 'bookname': book_name})
 
@@ -58,7 +60,8 @@ def down(request, book_id):
 
     print('电子邮箱为->%s' % email)
 
-    data = {'code': 200, 'msg': '提交下载任务成功，请稍后在邮箱查收文件<br/>感谢使用！', 'result': [], 'timestamp': round(time.time() * 1000)}
+    # data = {'code': 200, 'msg': '请稍后在邮箱中查收文件<br/>感谢使用！', 'result': [], 'timestamp': round(time.time() * 1000)}
+    data = {'code': 200, 'msg': '因无法支付邮件服务器费用，此功能暂时不可用', 'result': [], 'timestamp': round(time.time() * 1000)}
 
     return JsonResponse(data)
 

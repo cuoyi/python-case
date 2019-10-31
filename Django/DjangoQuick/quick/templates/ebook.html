@@ -70,7 +70,7 @@
 
             $.post('/down/' + id, params, function (data, status) {
                 if (data.code == 200) {
-                    layer.alert(data.msg);
+                    layer.alert(data.msg, { title: '提交下载任务成功', icon: 1 })
                 }
             }, 'json');
             layer.close(index);
