@@ -8,8 +8,8 @@ from multiprocessing import Pool
 import requests
 from bs4 import BeautifulSoup
 
-SERVER = 'http://www.biqukan.com'
-SEARCH = 'https://so.biqusoso.com/s.php?siteid=biqukan.com&q=%s'
+SERVER = 'https://www.biqugex.com/'
+SEARCH = 'https://so.biqusoso.com/s.php?siteid=biqugex.com&q=%s'
 
 # 书籍下载目录
 BOOKPATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'download')
