@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     # 写入结果文件
     with open(os.path.join(book_path, 'log_result.md'), 'a', encoding='utf-8') as f:
-        f.writelines('|URL  | Method  | Count |  T(s) |  AvgT(s)|  MaxT(s)|  MinT(s)|\n')
+        f.writelines('| URL | Method | Count | T(s) | AvgT(s) | MaxT(s) | MinT(s) |\n')
         f.writelines('| ---- | ---- | ---- | ---- | ---- | ---- |\n')
         for key, value in result_sort_dict_list:
             f.writelines('|  %s  |  %s  |  %s |  %s  |  %s  |  %s  |  %s  |\n' %
