@@ -79,8 +79,8 @@ def get_log_dict(log_line):
 # def get_log_files
 
 
-# 过滤掉静态文件
-def url_file_filter(_url, _status):
+# url过滤器
+def url_filter(_url, _status):
     filter_flag = False
     filter_url = ''
 
@@ -88,10 +88,13 @@ def url_file_filter(_url, _status):
     if int(_status) == 400:
         filter_flag = True
 
-    filter_list = ['.js', '.css', '.map', '.png', '.woff', '.woff2', '.ttf', '.ico']
-    for item in filter_list:
+    file_filter_list = ['.js', '.css', '.map', '.png', '.woff', '.woff2', '.ttf', '.ico']
+    for item in file_filter_list:
         if _url.endswith(item):
             filter_flag = True
+
+    # 过滤接口
+    interface_filter_list = {'/doctorapp', '/miniapp', '/thirdinterface'}
 
     if not filter_flag:
         url_last = _url.split('/')[-1:][0]
@@ -102,27 +105,19 @@ def url_file_filter(_url, _status):
             filter_url = _url[0:_url.rindex('/')]
         else:
             filter_url = _url
+
     return filter_flag, filter_url
 
 
-if __name__ == '__main__1':
-    book_path = 'D:\\xiezhonghai\\Desktop\\grouppurchaselog\\'
-    lists = [x for x in os.listdir(book_path) if x.find('access.log') > -1]
-
-    for item in lists:
-        print(os.path.join(book_path, item))
-
 if __name__ == '__main__':
 
-    interface_list = {'/goDrugstoreIndex'}
-
     book_path = 'D:\\xiezhonghai\\Desktop\\grouppurchaselog\\'
+
     # 获取目录下所有的日志文件
     log_path_list = [x for x in os.listdir(book_path) if x.find('access.log') > -1]
 
     # 结果集
     result = {}
-
     for log_path in log_path_list:
         with open(os.path.join(book_path, log_path), 'r', encoding='utf-8') as f:
             for line in f.readlines():
@@ -130,7 +125,8 @@ if __name__ == '__main__':
 
                 status = line_dict['status']
                 url_key = line_dict['request_uri'].split('?')[0]
-                filter_flag, filter_url = url_file_filter(url_key, status)
+
+                filter_flag, filter_url = url_filter(url_key, status)
 
                 url_key = filter_url + '-' + line_dict['request_method']
 
@@ -156,16 +152,17 @@ if __name__ == '__main__':
                                                                result[url_key]['request_max_time'])
         print('已处理文件：%s' % os.path.split(log_path)[1])
 
-    # 返回排序后的dict元组
-    result_sort_dict_list = [(k, result[k]) for k in sorted(result.keys())]
+    # 按照访问次数排序，返回排序后的dict元组
+    result_sort_dict_list = sorted(result.items(), key=lambda x: x[1]['request_count'], reverse=True)
 
     # 写入结果文件
-    with open('D:\\xiezhonghai\\Desktop\\grouppurchaselog\\log_result.md', 'a', encoding='utf-8') as f:
-        f.writelines('|接口url  | 请求方式  | 请求次数 |  请求时间(s) |  平均请求时间(s)|\n')
-        f.writelines('| ---- | ---- | ---- | ---- |\n')
+    with open(os.path.join(book_path, 'log_result.md'), 'a', encoding='utf-8') as f:
+        f.writelines('|URL  | Method  | Count |  T(s) |  AvgT(s)|  MaxT(s)|  MinT(s)|\n')
+        f.writelines('| ---- | ---- | ---- | ---- | ---- | ---- |\n')
         for key, value in result_sort_dict_list:
-            f.writelines('|%s |  %s  |  %s |  %s  | %s|\n' %
-                         (key.split('-')[0], key.split('-')[1], value['request_count'], value['request_time'], value['request_avg_time']))
+            f.writelines('|  %s  |  %s  |  %s |  %s  |  %s  |  %s  |  %s  |\n' %
+                         (key.split('-')[0], key.split('-')[1], value['request_count'], value['request_time'], value['request_avg_time'],
+                          value['request_max_time'], value['request_min_time']))
 
         f.writelines('---\n')
         f.writelines('统计文件：\n')
