@@ -1,10 +1,11 @@
-import re
 import json
 import os
+import re
 
 
 #匹配日志，返回一个字典
 def get_log_dict(log_line):
+
     # plaintext
     LOG_FORMAT = '$remote_addr $user_realip $remote_user $server_addr [$time_iso8601] $scheme $host "$request" $status $request_time $body_bytes_sent "$http_referer" "$http_user_agent" "$http_x_forwarded_for" "$upstream_addr" "$upstream_response_time" -'
 
@@ -65,18 +66,7 @@ def get_log_dict(log_line):
     result_dict = log_pattern_result.groupdict()
     result_dict.update(request_uri_pattern_result.groupdict())
 
-    # log_pattern_result['request_method'] = request_uri_pattern_result.groupdict('request_method')
-    # log_pattern_result['request_uri'] = request_uri_pattern_result.group(1)
-    # log_pattern_result['server_protocol'] = request_uri_pattern_result.group(2)
-
-    # for item in log_pattern_result:
-    #     print(item)
-    # print(result_dict)
     return result_dict
-
-
-# 遍历目录文件夹下的所有日志文件
-# def get_log_files
 
 
 # url过滤器
@@ -140,8 +130,6 @@ if __name__ == '__main__':
                         result[url_key]['request_avg_time'] = request_time
                         result[url_key]['request_max_time'] = request_time
                         result[url_key]['request_min_time'] = request_time
-
-                        # result[url_key]['response_time'] = response_time
                     else:
                         result[url_key]['request_count'] = int(result[url_key]['request_count']) + 1
                         result[url_key]['request_time'] = round(result[url_key]['request_time'] + request_time, 3)
@@ -153,7 +141,8 @@ if __name__ == '__main__':
         print('已处理文件：%s' % os.path.split(log_path)[1])
 
     # 按照访问次数排序，返回排序后的dict元组
-    result_sort_dict_list = sorted(result.items(), key=lambda x: x[1]['request_count'], reverse=True)
+    # result_sort_dict_list = sorted(result.items(), key=lambda x: x[1]['request_count'], reverse=True)
+    result_sort_dict_list = [(k, result[k]) for k in sorted(result.keys())]
 
     # 写入结果文件
     with open(os.path.join(book_path, 'log_result.md'), 'a', encoding='utf-8') as f:
