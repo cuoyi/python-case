@@ -101,7 +101,8 @@ def url_filter(_url, _status):
 
 if __name__ == '__main__':
 
-    book_path = 'D:\\xiezhonghai\\Desktop\\grouppurchaselog\\'
+    # book_path = 'D:\\xiezhonghai\\Desktop\\tuanlog'
+    book_path = 'D:\\xiezhonghai\\Desktop\\grouppurchaselog'
 
     # 获取目录下所有的日志文件
     log_path_list = [x for x in os.listdir(book_path) if x.find('access.log') > -1]
@@ -145,13 +146,13 @@ if __name__ == '__main__':
     result_sort_dict_list = [(k, result[k]) for k in sorted(result.keys())]
 
     # 写入结果文件
-    with open(os.path.join(book_path, 'log_result.md'), 'a', encoding='utf-8') as f:
-        f.writelines('| URL | Method | Count | T(s) | AvgT(s) | MaxT(s) | MinT(s) |\n')
-        f.writelines('| ---- | ---- | ---- | ---- | ---- | ---- |\n')
+    with open(os.path.join(book_path, os.path.abspath(book_path).split('\\')[-1:][0] + '_log_result.md'), 'a', encoding='utf-8') as f:
+        f.writelines('| URL  | Detail | Method | Count | SumT(s) | MaxT(s) | MinT(s) | AvgT(s) |\n')
+        f.writelines('| ----  | ---- | ---- | ---- | ---- | ---- | ---- | ---- |\n')
         for key, value in result_sort_dict_list:
-            f.writelines('|  %s  |  %s  |  %s |  %s  |  %s  |  %s  |  %s  |\n' %
-                         (key.split('-')[0], key.split('-')[1], value['request_count'], value['request_time'], value['request_avg_time'],
-                          value['request_max_time'], value['request_min_time']))
+            f.writelines('|  %s  |  %s  |  %s |  %s |  %s  |  %s  |  %s  |  %s  |\n' %
+                         (key.split('-')[0], '', key.split('-')[1], value['request_count'], value['request_time'],
+                          value['request_max_time'], value['request_min_time'], value['request_avg_time']))
 
         f.writelines('---\n')
         f.writelines('统计文件：\n')
