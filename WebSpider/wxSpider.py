@@ -45,22 +45,33 @@ def downBook(_book_name, a_href):
     return chapter_title
 
 
-def query(_url, _result):
-    req = requests.get(url=SERVER)
+URLS = []
+RESULT = {}
+
+
+def query(_url):
+    req = requests.get(url=_url)
     html = req.text
     bf = BeautifulSoup(html, 'lxml')
 
     a_list = bf.select('a[data-itemshowtype="0"]')[0:-2]
 
     for a in a_list:
-        _result[a.text] = a['href']
+        print('%s->%s' % (a.text, a['href']))
 
-    if (len(_result) < 100):
-        return _result
-    else:
-        query(_url, _result)
+        if a.text not in RESULT:
+            RESULT[a.text] = a['href']
+        else:
+            URLS.append(a['href'])
 
 
 if __name__ == "__main__":
-    result = {}
-    query(SERVER, result)
+
+    URLS.append(SERVER)
+
+    while len(URLS) < 10:
+        for url in URLS:
+            query(url)
+
+    print('URLS->%s' % URLS)
+    print('RESULT->%s' % RESULT)
